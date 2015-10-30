@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RadioGroup
+        android:id="@+id/colRG"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:checkedButton="@+id/col1"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/col1"
+            style="@style/PopupButtonStyle" />
+
+        <RadioButton
+            android:id="@+id/col2"
+            style="@style/PopupButtonStyle" />
+
+        <RadioButton
+            android:id="@+id/col3"
+            style="@style/PopupButtonStyle" />
+
+        <RadioButton
+            android:id="@+id/col4"
+            style="@style/PopupButtonStyle" />
+
+        <RadioButton
+            android:id="@+id/col5"
+            style="@style/PopupButtonStyle" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            style="@style/PopupWidthViewStyle"
+            android:layout_height="20dp"
+            android:background="@color/col1" />
+
+        <View
+            style="@style/PopupWidthViewStyle"
+            android:layout_height="20dp"
+            android:background="@color/col2" />
+
+        <View
+            style="@style/PopupWidthViewStyle"
+            android:layout_height="20dp"
+            android:background="@color/col3" />
+
+        <View
+            style="@style/PopupWidthViewStyle"
+            android:layout_height="20dp"
+            android:background="@color/col4" />
+
+        <View
+            style="@style/PopupWidthViewStyle"
+            android:layout_height="20dp"
+            android:background="@color/col5" />
+    </LinearLayout>
+
+</FrameLayout>

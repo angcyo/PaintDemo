@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.angcyo.paintdemo.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <com.angcyo.paintdemo.paint.PaintView
+        android:id="@+id/paint_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RadioGroup
+        android:id="@+id/shape_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:checkedButton="@+id/point"
+        android:orientation="vertical"
+        android:padding="@dimen/padding">
+
+        <RadioButton
+            android:id="@+id/point"
+            style="@style/ButtonStyle"
+            android:text="点" />
+
+        <RadioButton
+            android:id="@+id/line"
+            style="@style/ButtonStyle"
+            android:text="线" />
+
+        <RadioButton
+            android:id="@+id/circle"
+            style="@style/ButtonStyle"
+            android:text="圆" />
+
+        <RadioButton
+            android:id="@+id/rect"
+            style="@style/ButtonStyle"
+            android:text="矩形" />
+
+        <Button
+            android:id="@+id/color"
+            style="@style/ButtonStyle"
+            android:text="颜色" />
+
+        <Button
+            android:id="@+id/width"
+            style="@style/ButtonStyle"
+            android:text="粗细" />
+
+        <Button
+            android:id="@+id/clear"
+            style="@style/ButtonStyle"
+            android:text="清除" />
+
+        <Button
+            android:id="@+id/cancel"
+            style="@style/ButtonStyle"
+            android:text="撤销" />
+
+        <Button
+            android:id="@+id/capture"
+            style="@style/ButtonStyle"
+            android:text="截屏" />
+
+        <Button
+            android:id="@+id/share"
+            style="@style/ButtonStyle"
+            android:text="分享" />
+    </RadioGroup>
+</FrameLayout>

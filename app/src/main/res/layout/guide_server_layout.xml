@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/button_selector"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:layout_margin="3dp"
+    android:padding="6dp">
+
+    <TextView
+        android:id="@+id/tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="本机ip:192.168.1.111" />
+
+    <Button
+        android:id="@+id/btServer"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_size"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/button_selector"
+        android:text="作为服务端" />
+
+    <Button
+        android:id="@+id/btClient"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_size"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/button_selector"
+        android:text="作为客户端" />
+</LinearLayout>
