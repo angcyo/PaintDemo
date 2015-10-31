@@ -1,4 +1,4 @@
-package com.angcyo.paintdemo.Util;
+package com.angcyo.paintdemo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -36,7 +36,7 @@ import java.util.Random;
 /**
  * Created by angcyo on 15-09-08-008.
  */
-public class Util {
+public class RUtil {
     static String config = getSDPath() + File.separator + "config.ini";
 
     /**
@@ -198,7 +198,7 @@ public class Util {
 
     /**
      * 取得device的IP address
-     * <p>
+     * <p/>
      * 需要权限 android.permission.ACCESS_WIFI_STATE
      *
      * @param context
@@ -219,7 +219,7 @@ public class Util {
 
     /**
      * 获取网络ip
-     * */
+     */
     public static String getIp(Context context) {
         if (isWifiConnected(context)) {
             return getWifiIp(context);
@@ -253,7 +253,7 @@ public class Util {
      * @return 获取device的os version
      */
     public static String getOsVersion() {
-        String string = android.os.Build.VERSION.RELEASE;
+        String string = Build.VERSION.RELEASE;
         return string;
     }
 
@@ -261,7 +261,7 @@ public class Util {
      * @return 返回设备型号
      */
     public static String getDeviceName() {
-        String string = android.os.Build.MODEL;
+        String string = Build.MODEL;
         return string;
     }
 
@@ -303,7 +303,7 @@ public class Util {
      * @return 返回设备sdk版本
      */
     public static String getOsSdk() {
-        int sdk = android.os.Build.VERSION.SDK_INT;
+        int sdk = Build.VERSION.SDK_INT;
         return String.valueOf(sdk);
     }
 
@@ -635,4 +635,44 @@ public class Util {
         context.startActivity(webIntent);
     }
 
+    /**
+     * 检查是否有网络
+     */
+    public static boolean isNetworkAvailable(Context context) {
+        NetworkInfo info = getNetworkInfo(context);
+        if (info != null) {
+            return info.isAvailable();
+        }
+        return false;
+    }
+
+    /**
+     * 检查是否是WIFI
+     */
+    public static boolean isWifi(Context context) {
+        NetworkInfo info = getNetworkInfo(context);
+        if (info != null) {
+            if (info.getType() == ConnectivityManager.TYPE_WIFI)
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * 检查是否是移动网络
+     */
+    public static boolean isMobile(Context context) {
+        NetworkInfo info = getNetworkInfo(context);
+        if (info != null) {
+            if (info.getType() == ConnectivityManager.TYPE_MOBILE)
+                return true;
+        }
+        return false;
+    }
+
+    private static NetworkInfo getNetworkInfo(Context context) {
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo();
+    }
 }

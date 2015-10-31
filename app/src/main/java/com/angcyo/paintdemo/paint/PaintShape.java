@@ -15,8 +15,10 @@ public abstract class PaintShape {
     public static final String FIELD_STARTXY = "start_xy";
     public static final String FIELD_ENDXY = "end_xy";
 
-    public static final String FIELD_SEPARATOR = "|";
-    public static final String VALUE_SEPARATOR = ":";
+    public static final String FIELD_SEPARATOR_REG = "\\|";//匹配用
+    public static final String FIELD_SEPARATOR = "|";//分隔图形的字段
+    public static final String SHAPE_SEPARATOR = "@";//分隔不同的图形
+    public static final String VALUE_SEPARATOR = ":";//分隔字段
 
     protected float mStartX, mStartY, mEndX, mEndY;
     protected Paint mPaint;
@@ -31,21 +33,21 @@ public abstract class PaintShape {
         this.mPaint = mPaint;
     }
 
-    public static PaintShape generateShape(String string) throws Exception{
+    public static PaintShape generateShape(String string) throws Exception {
         PaintShape shape = null;
         if (!TextUtils.isEmpty(string)) {
-            String[] fields = string.split(FIELD_SEPARATOR);
+            String[] fields = string.split(FIELD_SEPARATOR_REG);
 
             //解析画笔
             Paint paint = new Paint();
             paint.setColor(Integer.parseInt(fields[1]));
             paint.setStrokeWidth(Float.parseFloat(fields[2]));
-            int style = Integer.parseInt(fields[3]);
-            if (style == 0) {
+            String style = fields[3];
+            if (style.equalsIgnoreCase("FILL")) {
                 paint.setStyle(Paint.Style.FILL);
-            } else if (style == 1) {
+            } else if (style.equalsIgnoreCase("STROKE")) {
                 paint.setStyle(Paint.Style.STROKE);
-            } else if (style == 2) {
+            } else if (style.equalsIgnoreCase("FILL_AND_STROKE")) {
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
             }
 

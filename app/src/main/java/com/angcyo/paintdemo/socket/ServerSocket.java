@@ -51,14 +51,20 @@ public class ServerSocket implements Runnable {
                     mClientSocket = null;
                 }
             }
+
+            Thread.yield();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+            }
         }
         disconnect();
     }
 
     private void sendBroadcast() {
-        Intent intent = new Intent(SocketConfig.BDC_CONNECT_SERVER);
+        Intent intent = new Intent(SocketConfig.BDC_CONNECT_CLIENT);
         Bundle bundle = new Bundle();
-        bundle.putString(SocketConfig.KEY_SERVER_IP, SocketConfig.SVR_IP);
+        bundle.putString(SocketConfig.KEY_CLIENT_IP, SocketConfig.CLIENT_IP);
         intent.putExtras(bundle);
         MainActivity.localBroadcastManager.sendBroadcast(intent);
     }

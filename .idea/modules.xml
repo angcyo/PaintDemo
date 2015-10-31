@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PaintDemo.iml" filepath="$PROJECT_DIR$/PaintDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/javademo/javademo.iml" filepath="$PROJECT_DIR$/javademo/javademo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sdk_chat_demo/sdk_chat_demo.iml" filepath="$PROJECT_DIR$/sdk_chat_demo/sdk_chat_demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sdk_chat_lib/sdk_chat_lib.iml" filepath="$PROJECT_DIR$/sdk_chat_lib/sdk_chat_lib.iml" />
     </modules>
   </component>
 </project>

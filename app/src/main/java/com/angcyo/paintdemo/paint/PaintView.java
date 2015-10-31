@@ -49,7 +49,7 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
     float fps;
 
     Vector<PaintShape> mShapes;//所有需要绘制的数据
-    Vector mBackShapes;//所有需要绘制的数据
+    Vector<PaintShape> mBackShapes;//所有需要绘制的数据
 
     PaintShape mShape;
 
@@ -90,8 +90,6 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
 //        setBackgroundColor(mViewBGCol);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(getContext());
-
-        mClientSocket = new ClientSocket();
     }
 
     @Override
@@ -194,27 +192,31 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
     @Override
     public void run() {
         while (isRunning) {
-            if (isChange) {
-                try {
-                    mBackShapes = (Vector) mShapes.clone();
+            synchronized (this) {
+                if (isChange) {
                     try {
-                        mClientSocket.updateWriteData(mBackShapes);
+                        mBackShapes = (Vector<PaintShape>) mShapes.clone();
+                        try {
+                            ClientSocket.updateWriteData(mBackShapes);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } catch (Exception e) {
                     }
-                } catch (Exception e) {
+                    isChange = false;
                 }
-                isChange = false;
-            }
-            synchronized (this) {
+
                 Canvas canvas = null;
                 try {
                     canvas = mSurfaceHolder.lockCanvas();
                     drawBg(canvas);
                     drawContent(canvas, mBackShapes);
-                    drawSvrContent(canvas, mClientSocket.getReadData());
+                    try {
+                        drawSvrContent(canvas, ClientSocket.getReadData());
+                    } catch (Exception e) {
+                    }
                     drawFps(canvas);
                     //                Log.e(TAG, mSurfaceWidth + "  " + mSurfaceHeight);
-
                     if (isCapture) {
                         if (captureBmp != null) {
                             captureBmp.recycle();
@@ -224,10 +226,11 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
                         drawBg(bitCanvas);
                         drawContent(bitCanvas, mBackShapes);
                         try {
-                            drawSvrContent(canvas, mClientSocket.getReadData());
+                            drawSvrContent(canvas, ClientSocket.getReadData());
                         } catch (Exception e) {
 
                         }
+                        drawFps(bitCanvas);
                         isCapture = false;
                         saveBitmap();
                     }

@@ -25,7 +25,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.angcyo.paintdemo.Util.Util;
 import com.angcyo.paintdemo.paint.PaintConfig;
 import com.angcyo.paintdemo.paint.PaintView;
 import com.angcyo.paintdemo.socket.ServerSocket;
@@ -37,9 +36,10 @@ import nt.finger.paint.FingerPaint;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int GUIDE_WIN_OFFSET = 60;
+    public static final int GUIDE_WIN_OFFSET = 80;
     public static LocalBroadcastManager localBroadcastManager;
     boolean isShare = false;
+    private BroadcastReceiver broadcastReceiver;
     private RadioGroup shapeGroup;
     private Button btUndo, btColor, btClear, btWidth, btCapture, btShare;
     private PaintView paintView;
@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        fab.setVisibility(View.GONE);
         initView();
         initEvent();
         initData();
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     mPopupTips.dismiss();
                 }
             }
-        }, 1000);
+        }, 3000);
     }
 
     private void initBroadcast() {
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(SocketConfig.BDC_CONNECT_CLIENT);
         intentFilter.addAction(SocketConfig.BDC_CONNECT_SERVER);
 
-        localBroadcastManager.registerReceiver(new BroadcastReceiver() {
+        broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 final Bundle bundle = intent.getExtras();
@@ -131,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             }
-        }, intentFilter);
+        };
+        localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
 
     private void share(String file) {
@@ -187,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        localIp = Util.getIp(this);
+        localIp = RUtil.getIp(this);
         ((TextView) mGuideServer.getContentView().findViewById(R.id.tips)).setText("本机IP:" + localIp);
     }
 
@@ -304,6 +306,7 @@ public class MainActivity extends AppCompatActivity {
                 SocketConfig.SVR_IP = svrIp;
 //                SocketConfig.isStartClient = true;
                 paintView.connectServer();
+                showPopupTip("正在连接...:" + svrIp);
             }
         });
     }
@@ -365,7 +368,15 @@ public class MainActivity extends AppCompatActivity {
         if (mServerSocket != null) {
             mServerSocket.exit();
         }
+        localBroadcastManager.unregisterReceiver(broadcastReceiver);
+        localBroadcastManager = null;
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        android.os.Process.killProcess(android.os.Process.myPid());
+        super.onBackPressed();
     }
 
     @Override

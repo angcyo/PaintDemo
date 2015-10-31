@@ -11,10 +11,10 @@ public class SocketConfig {
     /**
      * 服务端端口
      */
-    public static int SVR_PORT = 8711;
+    public static int SVR_PORT = 8720;
 
-    public static int READ_TIME_OUT = 3000;
-    public static int CONNECT_TIME_OUT = 3000;
+    public static int READ_TIME_OUT = 10000;
+    public static int CONNECT_TIME_OUT = 10000;
 
     public static String FLAG_SOCKET_READ_END = "!end!";//数据分隔标示
 

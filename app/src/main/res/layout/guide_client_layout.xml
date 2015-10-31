@@ -16,7 +16,7 @@
         android:inputType="textEmailAddress"
         android:maxLength="15"
         android:singleLine="true"
-        android:text="192.168.1.100" />
+        android:text="192.168.1.101" />
 
     <Button
         android:id="@+id/btSaveIp"
