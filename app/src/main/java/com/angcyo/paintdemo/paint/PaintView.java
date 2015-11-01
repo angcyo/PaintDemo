@@ -29,32 +29,28 @@ import java.util.Vector;
 /**
  * Created by angcyo on 15-10-29-029.
  */
-public class PaintView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener, Runnable {
+public class PaintView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener, ClientSocket.OnDataChangeListener {
     public static final String TAG = "PaintView";
     public static final String BDC_CAPTURE = "bdc_capture";//
     public static final String CAPTURE_PATH = "file_path";
     public static final String CAPTURE_CODE = "capture_code";
 
     public static boolean isRunning = true;
+    public static volatile boolean isChange = true;//先画一次
+    public static volatile boolean isSendToServer = true;//是否是发送出去
     SurfaceHolder mSurfaceHolder;
-
     @ColorInt
     int mViewBGCol;
     float downX, downY;
     float moveX, moveY;
-
     Paint mFpsPaint;
     float fpsCount = 0;
     long startTime = 0;
     float fps;
-
     Vector<PaintShape> mShapes;//所有需要绘制的数据
     Vector<PaintShape> mBackShapes;//所有需要绘制的数据
-
     PaintShape mShape;
-
     volatile Rect mDirtyRect;
-    volatile boolean isChange = false;
     Bitmap captureBmp;
     LocalBroadcastManager localBroadcastManager;
     private boolean isCapture = false;
@@ -99,13 +95,16 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
         isRunning = true;
         mSurfaceHolder.setFormat(PixelFormat.TRANSLUCENT);
 //        mDirtyRect = new Rect((int) downX - 10, (int) downY - 10, (int) downX + 10, (int) downY + 10);
-        new Thread(this).start();
+//        new Thread(this).start();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        isChange = true;
         PaintConfig.getInstance().setSurfaceWidth(width);
         PaintConfig.getInstance().setSurfaceHeight(height);
+
+        doDraw();
 //        Log.e(TAG, "surfaceChanged");
 
 //        Canvas canvas = mSurfaceHolder.lockCanvas();
@@ -117,6 +116,8 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
     public void surfaceDestroyed(SurfaceHolder holder) {
 //        Log.e(TAG, "surfaceDestroyed");
         isRunning = false;
+
+        disconnectServer();
     }
 
     @Override
@@ -130,7 +131,6 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
                 mShape.setmEndY(downY);
                 mShapes.add(mShape);
                 mDirtyRect = new Rect((int) downX - 10, (int) downY - 10, (int) downX + 10, (int) downY + 10);
-                isChange = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 moveX = event.getX();
@@ -140,7 +140,6 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
                     shape.setmEndX(mShapes.lastElement().getmStartX());
                     shape.setmEndY(mShapes.lastElement().getmStartY());
                     mShapes.add(shape);
-                    isChange = true;
                 } else {
                     mShape.setmEndX(moveX);
                     mShape.setmEndY(moveY);
@@ -153,9 +152,11 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
                 break;
             case MotionEvent.ACTION_UP:
                 mDirtyRect = null;
-                isChange = true;
                 break;
         }
+        isChange = true;
+        isSendToServer = true;
+        doDraw();
         return true;
     }
 
@@ -189,61 +190,64 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
         return shape;
     }
 
-    @Override
-    public void run() {
-        while (isRunning) {
-            synchronized (this) {
-                if (isChange) {
-                    try {
-                        mBackShapes = (Vector<PaintShape>) mShapes.clone();
+    public void doDraw() {
+        synchronized (this) {
+            if (isChange) {
+                //有变化重新绘制
+                try {
+                    mBackShapes = (Vector<PaintShape>) mShapes.clone();
+                    if (isSendToServer) {
                         try {
                             ClientSocket.updateWriteData(mBackShapes);
+                            isSendToServer = false;
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    } catch (Exception e) {
                     }
-                    isChange = false;
+                } catch (Exception e) {
                 }
-
                 Canvas canvas = null;
                 try {
                     canvas = mSurfaceHolder.lockCanvas();
                     drawBg(canvas);
                     drawContent(canvas, mBackShapes);
+
                     try {
                         drawSvrContent(canvas, ClientSocket.getReadData());
                     } catch (Exception e) {
                     }
-                    drawFps(canvas);
-                    //                Log.e(TAG, mSurfaceWidth + "  " + mSurfaceHeight);
-                    if (isCapture) {
-                        if (captureBmp != null) {
-                            captureBmp.recycle();
-                        }
-                        captureBmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-                        Canvas bitCanvas = new Canvas(captureBmp);
-                        drawBg(bitCanvas);
-                        drawContent(bitCanvas, mBackShapes);
-                        try {
-                            drawSvrContent(canvas, ClientSocket.getReadData());
-                        } catch (Exception e) {
-
-                        }
-                        drawFps(bitCanvas);
-                        isCapture = false;
-                        saveBitmap();
-                    }
-
                 } catch (Exception e) {
                 } finally {
                     if (canvas != null) {
                         mSurfaceHolder.unlockCanvasAndPost(canvas);
                     }
                 }
+                isChange = false;
+            }
+
+            //截图
+            if (isCapture) {
+                try {
+                    if (captureBmp != null) {
+                        captureBmp.recycle();
+                    }
+                    captureBmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas bitCanvas = new Canvas(captureBmp);
+                    drawBg(bitCanvas);
+                    drawContent(bitCanvas, mBackShapes);
+                    try {
+                        drawSvrContent(bitCanvas, ClientSocket.getReadData());
+                    } catch (Exception e) {
+                    }
+//                            drawFps(bitCanvas);
+                    isCapture = false;
+                    saveBitmap();
+                } catch (Exception e) {
+
+                }
             }
         }
-        disconnectServer();
+
     }
 
     private void disconnectServer() {
@@ -255,8 +259,16 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
     public void connectServer() {
         if (mClientSocket == null) {
             mClientSocket = new ClientSocket();
+            mClientSocket.setDataChangeListener(this);
         }
         new Thread(mClientSocket).start();
+    }
+
+    public void setClientSocket(ClientSocket clientSocket) {
+        if (mClientSocket == null) {
+            mClientSocket = clientSocket;
+            mClientSocket.setDataChangeListener(this);
+        }
     }
 
     private void saveBitmap() {
@@ -321,6 +333,8 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
         if (mShapes != null && mShapes.size() > 0) {
             mShapes.remove(mShapes.size() - 1);
             isChange = true;
+            isSendToServer = true;
+            doDraw();
         }
     }
 
@@ -328,6 +342,8 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
         if (mShapes != null && mShapes.size() > 0) {
             mShapes.clear();
             isChange = true;
+            isSendToServer = true;
+            doDraw();
         }
     }
 
@@ -336,5 +352,13 @@ public class PaintView extends SurfaceView implements SurfaceHolder.Callback, Vi
      */
     public void capture() {
         isCapture = true;
+        doDraw();
+    }
+
+    @Override
+    public void onDataChange() {
+        isChange = true;
+        isSendToServer = false;
+        doDraw();
     }
 }

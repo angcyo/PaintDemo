@@ -29,6 +29,7 @@ public class ClientSocket implements Runnable {
     private Socket mSocket;
     private ReadRunnable readRunnable;
     private WriteRunnable writeRunnable;
+    private OnDataChangeListener listener;
 
     public ClientSocket() {
     }
@@ -45,12 +46,16 @@ public class ClientSocket implements Runnable {
         }
     }
 
-    private static void updateReadData(Vector newData) {
+    private static synchronized void updateReadData(Vector newData) {
         readData = newData;
     }
 
     public static Vector<PaintShape> getReadData() {
         return readData;
+    }
+
+    public void setDataChangeListener(OnDataChangeListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -147,6 +152,14 @@ public class ClientSocket implements Runnable {
             }
         }
         updateReadData(paintShapes);
+
+        if (listener != null) {
+            listener.onDataChange();
+        }
+    }
+
+    public interface OnDataChangeListener {
+        void onDataChange();
     }
 
     /**
@@ -194,34 +207,24 @@ public class ClientSocket implements Runnable {
 
                         }
                     }
-                }
-//                Vector<PaintShape> datas = (Vector<PaintShape>) writeData.clone();
-//                StringBuilder stringBuilder = new StringBuilder();
-//                while (writeData.size() > 0) {
-//                    PaintShape shape = writeData.remove(0);
-//                    stringBuilder.append(shape.toString());
-//                    stringBuilder.append(PaintShape.SHAPE_SEPARATOR);
-//                    outputStream.write(shape.toString().getBytes());
-//                }
-//                stringBuilder.append(SocketConfig.FLAG_SOCKET_READ_END);
-                try {
-//                    outputStream.write(stringBuilder.toString().getBytes());
-                    while (writeData.size() > 0) {
-                        PaintShape shape = writeData.remove(0);
-                        outputStream.write(shape.toString().getBytes());
-                        outputStream.write(PaintShape.SHAPE_SEPARATOR.getBytes());
-                    }
-                    outputStream.write(SocketConfig.FLAG_SOCKET_READ_END.getBytes());
-                    outputStream.flush();
-                    writeData.clear();
-                    writeData = null;
-                } catch (Exception e) {
+                } else {
                     try {
-                        disconnect();
-                    } catch (IOException e1) {
+                        while (writeData.size() > 0) {
+                            PaintShape shape = writeData.remove(0);
+                            outputStream.write(shape.toString().getBytes());
+                            outputStream.write(PaintShape.SHAPE_SEPARATOR.getBytes());
+                        }
+                        outputStream.write(SocketConfig.FLAG_SOCKET_READ_END.getBytes());
+                        outputStream.flush();
+                        writeData.clear();
+                        writeData = null;
+                    } catch (Exception e) {
+                        try {
+                            disconnect();
+                        } catch (IOException e1) {
+                        }
                     }
                 }
-
             }
         }
     }

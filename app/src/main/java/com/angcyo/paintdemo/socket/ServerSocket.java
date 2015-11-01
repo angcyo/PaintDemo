@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.angcyo.paintdemo.MainActivity;
+import com.angcyo.paintdemo.paint.PaintView;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -16,10 +17,12 @@ public class ServerSocket implements Runnable {
     java.net.ServerSocket mServerSocket;
     Socket mClient;
     ClientSocket mClientSocket;
+    PaintView paintView;
 
     private boolean isRunning = true;
 
-    public ServerSocket() {
+    public ServerSocket(PaintView paintView) {
+        this.paintView = paintView;
     }
 
     public void exit() {
@@ -42,6 +45,7 @@ public class ServerSocket implements Runnable {
             if (mClientSocket == null && mClient != null) {
                 try {
                     mClientSocket = new ClientSocket(mClient);
+                    paintView.setClientSocket(mClientSocket);
                 } catch (IOException e) {
                     try {
                         mClient.close();

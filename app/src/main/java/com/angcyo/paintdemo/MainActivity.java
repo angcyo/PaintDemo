@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                 mGuideServer.dismiss();
                 SocketConfig.isServer = true;
                 SocketConfig.SVR_IP = localIp;
-                mServerSocket = new ServerSocket();
+                mServerSocket = new ServerSocket(paintView);
                 new Thread(mServerSocket).start();
                 showPopupTip("等待连接...");
             }
